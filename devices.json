@@ -1,0 +1,68 @@
+[
+  {
+    "_manager": {
+      "_activePromises": [
+        Object
+      ],
+      "_activeSubscriptions": [
+        Object
+      ],
+      "_errorCodesToMessagesMapping": [
+        Object
+      ],
+      "_eventEmitter": [
+        NativeEventEmitter
+      ],
+      "_scanEventSubscription": null,
+      "_uniqueId": 7
+    },
+    "deviceID": "80:7D:3A:E6:79:DA",
+    "id": 1,
+    "isPrimary": true,
+    "uuid": "00001801-0000-1000-8000-00805f9b34fb"
+  },
+  {
+    "_manager": {
+      "_activePromises": [
+        Object
+      ],
+      "_activeSubscriptions": [
+        Object
+      ],
+      "_errorCodesToMessagesMapping": [
+        Object
+      ],
+      "_eventEmitter": [
+        NativeEventEmitter
+      ],
+      "_scanEventSubscription": null,
+      "_uniqueId": 7
+    },
+    "deviceID": "80:7D:3A:E6:79:DA",
+    "id": 4,
+    "isPrimary": true,
+    "uuid": "00001800-0000-1000-8000-00805f9b34fb"
+  },
+  {
+    "_manager": {
+      "_activePromises": [
+        Object
+      ],
+      "_activeSubscriptions": [
+        Object
+      ],
+      "_errorCodesToMessagesMapping": [
+        Object
+      ],
+      "_eventEmitter": [
+        NativeEventEmitter
+      ],
+      "_scanEventSubscription": null,
+      "_uniqueId": 7
+    },
+    "deviceID": "80:7D:3A:E6:79:DA",
+    "id": 8,
+    "isPrimary": true,
+    "uuid": "0000181a-0000-1000-8000-00805f9b34fb"
+  }
+]
