@@ -8,6 +8,7 @@ import moment from 'moment';
 const airMonitorServiceUUID = 'db101875-d9c4-4c10-b856-fad3a581a6ea';
 const tempCharacteristicUUID = '06576524-99f9-4dc5-b6ea-c66dc433e6f2';
 const co2CharacteristicUUID = '4e1fb0da-dc91-43ea-9b6d-77f699ddbbed';
+const graphCharactericUUID = '900dd909-eb3a-4774-bcdb-b10d8dd2ae28';
 
 export default class HelloWorldApp extends Component {
   static navigationOptions = {
@@ -47,7 +48,7 @@ export default class HelloWorldApp extends Component {
         let converted = Buffer.from(characteristic.value, 'base64').toString(
           'ascii',
         );
-        console.log('Got value: ' + converted);
+        //console.log('Got value: ' + converted);
         let lastUpdate = moment(new Date());
         this.setState({temp: converted, lastUpdate});
         this.setState({connected: true});
@@ -67,10 +68,26 @@ export default class HelloWorldApp extends Component {
         let converted = Buffer.from(characteristic.value, 'base64').toString(
           'ascii',
         );
-        console.log('Got value: ' + converted);
+        // console.log('Got value: ' + converted);
         let lastUpdate = moment(new Date());
         this.setState({co2: converted, lastUpdate});
         this.setState({connected: true});
+      },
+    );
+    device.monitorCharacteristicForService(
+      airMonitorServiceUUID,
+      graphCharactericUUID,
+      (error, characteristic) => {
+        if (error) {
+          console.log(error.message);
+          ToastAndroid.show(error.message, ToastAndroid.SHORT);
+          this.setState({connected: false});
+          return;
+        }
+        let converted = Buffer.from(characteristic.value, 'base64').toString(
+          'ascii',
+        );
+        console.log('Got value: ' + converted);
       },
     );
   }
@@ -91,41 +108,61 @@ export default class HelloWorldApp extends Component {
     }, true);
   }
   scanAndConnect() {
-    this.manager.startDeviceScan(null, null, (error, device) => {
-      console.log('Scanning...');
-      console.log(device);
+    this.manager.startDeviceScan(
+      null,
+      {autoConnect: true, requestMTU: 512},
+      (error, device) => {
+        console.log('Scanning...');
+        console.log(device);
 
-      if (error) {
-        this.error(error.message);
-        this.setState({connected: false});
-        return;
-      }
+        if (error) {
+          this.error(error.message);
+          this.setState({connected: false});
+          return;
+        }
 
-      if (device.name === 'Air Quality Monitor') {
-        console.log('Connecting to Air Quality Monitor');
-        this.manager.stopDeviceScan();
-        device
-          .connect()
-          .then(device => {
-            console.log('Discovering services and characteristics');
-            return device.discoverAllServicesAndCharacteristics();
-          })
-          .then(device => {
-            console.log('Setting notifications');
-            this.setState({deviceID: device.id});
-            return this.setupNotifications(device);
-          })
-          .then(
-            () => {
-              console.log('Listening...');
-            },
-            error => {
-              console.log(error.message);
-              this.setState({connected: false});
-            },
-          );
-      }
-    });
+        if (device.name === 'Air Quality Monitor') {
+          console.log('Connecting to Air Quality Monitor');
+          this.manager.stopDeviceScan();
+          device
+            .connect()
+            .then(device => {
+              console.log('Discovering services and characteristics');
+              return device.discoverAllServicesAndCharacteristics();
+            })
+            .then(device => {
+              console.log('Setting notifications');
+              this.setState({deviceID: device.id});
+              return this.setupNotifications(device);
+            })
+            .then(
+              () => {
+                console.log('Listening...');
+                this.manager
+                  .requestMTUForDevice(device.id, 512)
+                  .then(mtu => {
+                    // Success code
+                    console.log(
+                      'MTU size changed to ' +
+                        mtu.mtu +
+                        ' bytes' +
+                        ' from ' +
+                        device.mtu,
+                    );
+                  })
+                  .catch(error => {
+                    // Failure code
+                    console.log(error);
+                  });
+              },
+              error => {
+                console.log(error.message);
+                this.setState({connected: false});
+              },
+            );
+        }
+      },
+    );
   }
 
   render() {
