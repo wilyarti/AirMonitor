@@ -116,7 +116,8 @@ export default class HelloWorldApp extends Component {
         console.log(device);
 
         if (error) {
-          this.error(error.message);
+          console.log(error.message);
+          ToastAndroid.show(error.message,  ToastAndroid.SHORT);
           this.setState({connected: false});
           return;
         }
