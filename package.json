@@ -11,10 +11,13 @@
   },
   "dependencies": {
     "buffer": "^5.4.3",
+    "install": "^0.13.0",
     "moment": "^2.24.0",
     "react": "16.9.0",
     "react-native": "^0.61.5",
-    "react-native-ble-plx": "^1.1.0"
+    "react-native-ble-plx": "^1.1.0",
+    "react-native-chart-kit": "^4.3.0",
+    "react-native-svg": "^9.13.6"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",
