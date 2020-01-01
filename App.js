@@ -1,34 +1,24 @@
 import React, {Component} from 'react';
 import {
-  Text,
-  View,
-  ListItem,
-  Image,
   Button,
-  Platform,
-  StyleSheet,
+  Dimensions,
+  Image,
+  Text,
+  ToastAndroid,
+  View,
 } from 'react-native';
 import {LineChart} from 'react-native-chart-kit';
-import {Dimensions} from 'react-native';
-
-const screenWidth = Dimensions.get('window').width;
-
 import {BleManager} from 'react-native-ble-plx';
-import {ToastAndroid} from 'react-native';
 import {Buffer} from 'buffer';
 import moment from 'moment';
+import {PermissionsAndroid} from 'react-native';
+
+const screenWidth = Dimensions.get('window').width;
 
 const airMonitorServiceUUID = 'db101875-d9c4-4c10-b856-fad3a581a6ea';
 const tempCharacteristicUUID = '06576524-99f9-4dc5-b6ea-c66dc433e6f2';
 const co2CharacteristicUUID = '4e1fb0da-dc91-43ea-9b6d-77f699ddbbed';
 const graphCharactericUUID = '900dd909-eb3a-4774-bcdb-b10d8dd2ae28';
-
-const chartConfig = {
-  backgroundGradientFrom: '#1E2923',
-  backgroundGradientTo: '#08130D',
-  color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
-  strokeWidth: 2, // optional, default 3
-};
 
 export default class HelloWorldApp extends Component {
   static navigationOptions = {
@@ -45,6 +35,7 @@ export default class HelloWorldApp extends Component {
     super();
     this.manager = new BleManager();
     this.state = {
+      isLoading: false,
       deviceID: '00:00:00:00:00:00',
       devices: [],
       connected: false,
@@ -55,12 +46,52 @@ export default class HelloWorldApp extends Component {
         labels: ['time'],
         datasets: [
           {
-            data: [0
-            ],
+            data: [0],
           },
         ],
       },
+      chartConfig: {
+        backgroundColor: '#e26a00',
+        backgroundGradientFrom: '#fb8c00',
+        backgroundGradientTo: '#ffa726',
+        strokeWidth: 0.1,
+        decimalPlaces: 2, // optional, defaults to 2dp
+        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+        style: {
+          borderRadius: 16,
+        },
+        propsForDots: {
+          r: '6',
+          strokeWidth: '0.1',
+          stroke: '#ffa726',
+        },
+      },
     };
+  }
+  async requestBlePermission() {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+        {
+          title: 'Access Bluetooth',
+          message:
+            'In order to connect to the Air Monitor, this app requires Bluetooth access.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use Bluetooth');
+        this.setState({isLoading: false});
+      } else {
+        console.log('Bluetooth permission denied');
+        this.setState({isLoading: false});
+      }
+    } catch (err) {
+      console.warn(err);
+    }
   }
   async setupNotifications(device) {
     device.monitorCharacteristicForService(
@@ -125,18 +156,22 @@ export default class HelloWorldApp extends Component {
           console.log(data);
           console.log(data[2].dataID);
           let dataset = this.state.chartData;
-          // reset if we have recieved all the data before
-          if (dataset.datasets[0].data.length > 256) {
+          // reset if we have received all the data before
+          if (data[2].sequenceID == 0) {
             dataset.datasets[0].data = [];
+            dataset.labels = [];
           }
           // setup our labels
           dataset.labels = [];
-          for (let i = 0; i < data[2].count; i += 10) {
+          for (let i = 0; i < data[2].count; i++) {
             let newMoment = new moment()
               .subtract(nowMs - data[1][i])
               .format('HH:mm');
-            console.log(newMoment);
-            dataset.labels.push(newMoment);
+            if (i % 3 == 0) {
+              dataset.labels.push(newMoment);
+            } else {
+              dataset.labels.push('');
+            }
           }
           for (let i = 0; i < data[2].count; i++) {
             dataset.datasets[0].data.push(data[0][i]);
@@ -150,22 +185,32 @@ export default class HelloWorldApp extends Component {
     );
   }
   handleConnectButton() {
+    this.setState({isLoading: true});
     console.log('Handling button press');
     if (this.state.connected) {
-      this.manager.cancelDeviceConnection(this.state.deviceID);
+      this.manager.cancelDeviceConnection(this.state.deviceID).then(() => {
+        this.setState({isLoading: false});
+      });
     } else {
       this.scanAndConnect();
     }
   }
   componentDidMount() {
-    const subscription = this.manager.onStateChange(state => {
-      if (state === 'PoweredOn') {
-        this.scanAndConnect();
-        subscription.remove();
-      }
-    }, true);
+    try {
+      this.requestBlePermission().then(() => {
+        const subscription = this.manager.onStateChange(state => {
+          if (state === 'PoweredOn') {
+            this.scanAndConnect();
+            subscription.remove();
+          }
+        }, true);
+      });
+    } catch (error) {
+      console.log('Error setting up Bluetooth.' + error.message);
+    }
   }
   scanAndConnect() {
+    this.setState({isLoading: true});
     this.manager.startDeviceScan(
       null,
       {autoConnect: true, requestMTU: 512},
@@ -176,7 +221,8 @@ export default class HelloWorldApp extends Component {
         if (error) {
           console.log(error.message);
           ToastAndroid.show(error.message, ToastAndroid.SHORT);
-          this.setState({connected: false});
+          this.setState({connected: false, isLoading: false});
+          this.requestBlePermission();
           return;
         }
 
@@ -218,7 +264,10 @@ export default class HelloWorldApp extends Component {
                 console.log(error.message);
                 this.setState({connected: false});
               },
-            );
+            )
+            .finally(() => {
+              this.setState({isLoading: false});
+            });
         }
       },
     );
@@ -255,6 +304,7 @@ export default class HelloWorldApp extends Component {
           <Text>Last update: {lastUpdate}</Text>
           <Button
             title={this.state.connected ? 'Disconnect' : 'Connect'}
+            disabled={this.state.isLoading}
             onPress={() => this.handleConnectButton()}
           />
           <LineChart
@@ -262,16 +312,7 @@ export default class HelloWorldApp extends Component {
             width={Dimensions.get('window').width} // from react-native
             height={Dimensions.get('window').height * 0.7}
             yAxisLabel={''}
-            chartConfig={{
-              backgroundColor: '#e26a00',
-              backgroundGradientFrom: '#fb8c00',
-              backgroundGradientTo: '#ffa726',
-              decimalPlaces: 2, // optional, defaults to 2dp
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              style: {
-                borderRadius: 16,
-              },
-            }}
+            chartConfig={this.state.chartConfig}
             bezier
             style={{
               marginVertical: 8,
