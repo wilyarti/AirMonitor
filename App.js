@@ -45,7 +45,7 @@ export default class HelloWorldApp extends Component {
       lastUpdate: '',
       labels: ['Time'],
       dataID: 0,
-      data: [{x: new moment(), y: 2}],
+      data: [{x: new moment(), y: 0}, {x: new moment(), y: 0}, {x: new moment(), y: 0}],
     };
     this.scanAndConnect = scanAndConnect.bind(this);
     this.handleConnectButton = handleConnectButton.bind(this);

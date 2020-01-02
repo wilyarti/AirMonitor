@@ -61,7 +61,7 @@ export function scanAndConnect() {
           )
           .then(() => {
             console.log('Setting notifications');
-            this.setState({deviceID: device.id});
+            this.setState({deviceID: device.id, connected: true});
             return this.setupNotifications(device);
           })
           .finally(() => {
