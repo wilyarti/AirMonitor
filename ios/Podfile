@@ -36,6 +36,8 @@ target 'AirMonitor' do
 
   pod 'react-native-ble-plx', :path => '../node_modules/react-native-ble-plx'
 
+  pod 'RNSVG', :path => '../node_modules/react-native-svg'
+
   target 'AirMonitorTests' do
     inherit! :search_paths
     # Pods for testing
