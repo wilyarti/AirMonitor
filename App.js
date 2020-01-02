@@ -6,6 +6,7 @@ import {
   Text,
   ToastAndroid,
   View,
+  ScrollView,
 } from 'react-native';
 import {
   scanAndConnect,
@@ -14,12 +15,9 @@ import {
   requestBlePermission,
   setupNotifications,
 } from './Functions';
-import {LineChart} from 'react-native-chart-kit';
 import {BleManager} from 'react-native-ble-plx';
 import {VictoryChart, VictoryLine} from 'victory-native';
-import {Buffer} from 'buffer';
 import moment from 'moment';
-import {PermissionsAndroid} from 'react-native';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -47,34 +45,9 @@ export default class HelloWorldApp extends Component {
       lastUpdate: '',
       labels: ['Time'],
       dataID: 0,
-      chartData: {
-        labels: ['time'],
-        datasets: [
-          {
-            data: [0],
-          },
-        ],
-      },
-      chartConfig: {
-        backgroundColor: '#e26a00',
-        backgroundGradientFrom: '#fb8c00',
-        backgroundGradientTo: '#ffa726',
-        strokeWidth: 0.1,
-        decimalPlaces: 2, // optional, defaults to 2dp
-        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        style: {
-          borderRadius: 16,
-        },
-        propsForDots: {
-          r: '6',
-          strokeWidth: '0.1',
-          stroke: '#ffa726',
-        },
-      },
+      data: [{x: new moment(), y: 2}],
     };
     this.scanAndConnect = scanAndConnect.bind(this);
-    this.request;
     this.handleConnectButton = handleConnectButton.bind(this);
     this.processGraph = processGraph.bind(this);
     this.requestBlePermission = requestBlePermission.bind(this);
@@ -101,48 +74,51 @@ export default class HelloWorldApp extends Component {
     const lastUpdate = this.state.lastUpdate
       ? moment(this.state.lastUpdate).fromNow()
       : 'Not connected';
+    const data = this.state.data;
     return (
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'column',
-          justifyItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <View style={{alignItems: 'center', flex: 1}}>
+      <View style={{flex: 1, flexDirection: 'column'}}>
+        <View
+          style={{
+            flex: 7,
+            alignItems: 'center',
+          }}>
           <Image
             source={require('./favicon.png')}
             style={{width: 230 / 4, height: 266 / 4, resizeMode: 'stretch'}}
           />
-          <Text style={{alignContent: 'center', fontSize: 18}}>
-            Air Quality Monitor
-          </Text>
-          <Text>
-            {list.map((l, i) => (
-              <Text key={i}>{l}</Text>
-            ))}{' '}
-          </Text>
-          <Text>Temperature: {this.state.temp}</Text>
-          <Text>CO2: {this.state.co2}</Text>
-          <Text>Last update: {lastUpdate}</Text>
-          <Button
-            title={this.state.connected ? 'Disconnect' : 'Connect'}
-            disabled={this.state.isLoading}
-            onPress={() => this.handleConnectButton()}
-          />
-          
-          <LineChart
-            data={this.state.chartData}
-            width={Dimensions.get('window').width} // from react-native
-            height={Dimensions.get('window').height * 0.7}
-            yAxisLabel={''}
-            chartConfig={this.state.chartConfig}
-            bezier
-            style={{
-              marginVertical: 8,
-              borderRadius: 16,
-            }}
-          />
+          <ScrollView>
+            <Text style={{fontSize: 18}}>Air Quality Monitor</Text>
+            <Text>
+              {list.map((l, i) => (
+                <Text key={i}>{l}</Text>
+              ))}{' '}
+            </Text>
+            <Text>Temperature: {this.state.temp}</Text>
+            <Text>CO2: {this.state.co2}</Text>
+            <Text>Last update: {lastUpdate}</Text>
+            <Button
+              title={this.state.connected ? 'Disconnect' : 'Connect'}
+              disabled={this.state.isLoading}
+              onPress={() => this.handleConnectButton()}
+            />
+          </ScrollView>
+        </View>
+        <View style={{flex: 16}}>
+          {this.state.connected && (
+            <VictoryChart
+              height={Dimensions.get('window').height * ((1 / 24) * 16)}>
+              <VictoryLine
+                style={{
+                  data: {stroke: '#c43a31'},
+                  parent: {border: '1px solid #ccc'},
+                }}
+                scale={{x: 'time'}}
+                data={data}
+              />
+            </VictoryChart>
+          )}
+        </View>
+        <View style={{flex: 1}}>
           <Text>{this.state.connected ? 'Connected' : 'Not connected'}</Text>
         </View>
       </View>

@@ -150,35 +150,28 @@ export async function setupNotifications(device) {
         'ascii',
       );
       try {
-        let data = JSON.parse(converted);
-        let labels = this.state.labels;
-        let nowMs = data[2].timenow;
-        console.log(data);
-        if (data[2].sequenceID === 65536) {
+        let jsonData = JSON.parse(converted);
+        let nowMs = jsonData[2].timenow;
+        let data = this.state.data;
+        console.log(jsonData);
+        if (jsonData[2].sequenceID === 65536) {
           console.log('Processing labels');
-          this.processGraph();
+          //this.processGraph(); ? Animate?
         }
-        if (data[2].dataID != this.state.dataID) {
+        if (jsonData[2].dataID != this.state.dataID) {
           return;
         }
-        let dataset = this.state.chartData;
         // reset if we have received all the data before
-        if (data[2].sequenceID == 0) {
-          dataset.datasets[0].data = [];
-          labels = [];
-          dataset.labels = [];
+        if (jsonData[2].sequenceID == 0) {
+          data = [];
         }
         // setup our labels
-        for (let i = 0; i < data[2].count; i++) {
-          let newMoment = new moment()
-            .subtract(nowMs - data[1][i])
-            .format('HH:mm');
-          labels.push(newMoment);
+        for (let i = 0; i < jsonData[2].count; i++) {
+          let newMoment = new moment().subtract(nowMs - jsonData[1][i]);
+          let point = {x: newMoment, y: jsonData[0][i]};
+          data.push(point);
         }
-        for (let i = 0; i < data[2].count; i++) {
-          dataset.datasets[0].data.push(data[0][i]);
-        }
-        this.setState({chartData: dataset, labels});
+        this.setState({data});
       } catch (error) {
         console.log('Error passing JSON');
         console.log(error);
