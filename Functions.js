@@ -209,3 +209,4 @@ export function processGraph() {
   }
   this.setState({chartData});
 }
+

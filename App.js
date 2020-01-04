@@ -20,7 +20,30 @@ import {VictoryChart, VictoryLine} from 'victory-native';
 import moment from 'moment';
 
 const screenWidth = Dimensions.get('window').width;
+const colorSwitcher: any = {
+  stroke: (data: any) => {
+    let color = 'orange';
 
+    if (data.y > 0 && data.y <= 850) {
+      color = 'green';
+    }
+
+    if (data.y > 850 && data.y <= 1250) {
+      color = 'yellow';
+    }
+
+    if (data.y > 1250 && data.y <= 1500) {
+      color = 'red';
+    }
+
+    if (data.y > 1500 && data.y <= 5000) {
+      color = 'purple';
+    }
+
+    return color;
+  },
+  strokeWidth: 1.5,
+};
 export default class HelloWorldApp extends Component {
   static navigationOptions = {
     title: 'Home',
@@ -45,7 +68,11 @@ export default class HelloWorldApp extends Component {
       lastUpdate: '',
       labels: ['Time'],
       dataID: 0,
-      data: [{x: new moment(), y: 0}, {x: new moment(), y: 0}, {x: new moment(), y: 0}],
+      data: [
+        {x: new moment(), y: 0},
+        {x: new moment(), y: 0},
+        {x: new moment(), y: 0},
+      ],
     };
     this.scanAndConnect = scanAndConnect.bind(this);
     this.handleConnectButton = handleConnectButton.bind(this);
@@ -108,10 +135,7 @@ export default class HelloWorldApp extends Component {
             <VictoryChart
               height={Dimensions.get('window').height * ((1 / 24) * 16)}>
               <VictoryLine
-                style={{
-                  data: {stroke: '#c43a31'},
-                  parent: {border: '1px solid #ccc'},
-                }}
+                style={{data: {...colorSwitcher}}}
                 scale={{x: 'time'}}
                 data={data}
               />
