@@ -16,35 +16,21 @@ import {
   setupNotifications,
 } from './Functions';
 import {BleManager} from 'react-native-ble-plx';
-import {VictoryChart, VictoryLine} from 'victory-native';
+import {
+  VictoryArea,
+  VictoryChart,
+  VictoryLine,
+  VictoryBar,
+  VictoryGroup,
+} from 'victory-native';
 import moment from 'moment';
+import {Defs, LinearGradient, Stop} from 'react-native-svg';
+import VClipPath from 'victory-native/lib/components/victory-primitives/clip-path';
+import VRect from 'victory-native/lib/components/victory-primitives/rect';
 
 const screenWidth = Dimensions.get('window').width;
-const colorSwitcher: any = {
-  stroke: (data: any) => {
-    let color = 'orange';
 
-    if (data.y > 0 && data.y <= 850) {
-      color = 'green';
-    }
-
-    if (data.y > 850 && data.y <= 1250) {
-      color = 'yellow';
-    }
-
-    if (data.y > 1250 && data.y <= 1500) {
-      color = 'red';
-    }
-
-    if (data.y > 1500 && data.y <= 5000) {
-      color = 'purple';
-    }
-
-    return color;
-  },
-  strokeWidth: 1.5,
-};
-export default class HelloWorldApp extends Component {
+export default class AirMonitor extends Component {
   static navigationOptions = {
     title: 'Home',
     headerStyle: {
@@ -101,7 +87,24 @@ export default class HelloWorldApp extends Component {
     const lastUpdate = this.state.lastUpdate
       ? moment(this.state.lastUpdate).fromNow()
       : 'Not connected';
-    const data = this.state.data;
+    const redData = [
+      {x: new moment(), y: 0},
+      {x: new moment(), y: 0},
+      {x: new moment(), y: 0},
+    ];
+    const greenData = [
+      {x: new moment(), y: 0},
+      {x: new moment(), y: 0},
+      {x: new moment(), y: 0},
+    ];
+    this.state.data.map(point => {
+      if (point.y >= 700) {
+        redData.push(point);
+      } else {
+        greenData.push(point);
+      }
+    });
+
     return (
       <View style={{flex: 1, flexDirection: 'column'}}>
         <View
@@ -130,14 +133,26 @@ export default class HelloWorldApp extends Component {
             />
           </ScrollView>
         </View>
+
         <View style={{flex: 16}}>
           {this.state.connected && (
             <VictoryChart
               height={Dimensions.get('window').height * ((1 / 24) * 16)}>
               <VictoryLine
-                style={{data: {...colorSwitcher}}}
+                style={{
+                  data: {stroke: 'red'},
+                  parent: {border: '1px solid #ccc'},
+                }}
                 scale={{x: 'time'}}
-                data={data}
+                data={redData}
+              />
+              <VictoryLine
+                style={{
+                  data: {stroke: 'green'},
+                  parent: {border: '1px solid #ccc'},
+                }}
+                scale={{x: 'time'}}
+                data={greenData}
               />
             </VictoryChart>
           )}

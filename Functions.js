@@ -155,7 +155,7 @@ export async function setupNotifications(device) {
         let data = this.state.data;
         console.log(jsonData);
         if (jsonData[2].sequenceID === 65536) {
-          console.log('Processing labels');
+          console.log(this.state.data);
           //this.processGraph(); ? Animate?
         }
         if (jsonData[2].dataID != this.state.dataID) {
@@ -168,7 +168,8 @@ export async function setupNotifications(device) {
         // setup our labels
         for (let i = 0; i < jsonData[2].count; i++) {
           let newMoment = new moment().subtract(nowMs - jsonData[1][i]);
-          let point = {x: newMoment, y: jsonData[0][i]};
+          let color = getColor(jsonData[0][i]);
+          let point = {x: newMoment, y: jsonData[0][i], fill: color};
           data.push(point);
         }
         this.setState({data});
@@ -178,6 +179,24 @@ export async function setupNotifications(device) {
       }
     },
   );
+}
+export function getColor(value) {
+  value = parseInt(value);
+  if (value <= 500) {
+    return 'blue';
+  } else if (value <= 1000) {
+    return 'green';
+  } else if (value <= 1500) {
+    return 'yellow';
+  } else if (value <= 2000) {
+    return 'orange';
+  } else if (value <= 2500) {
+    return 'red';
+  } else if (value <= 5000) {
+    return 'purple';
+  } else {
+    return 'pink';
+  }
 }
 export function handleConnectButton() {
   this.setState({isLoading: true});
@@ -209,4 +228,3 @@ export function processGraph() {
   }
   this.setState({chartData});
 }
-
