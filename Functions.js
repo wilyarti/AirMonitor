@@ -155,7 +155,7 @@ export async function setupNotifications(device) {
         let data = this.state.data;
         console.log(jsonData);
         if (jsonData[2].sequenceID === 65536) {
-          console.log(this.state.data);
+          //console.log(this.state.data);
           //this.processGraph(); ? Animate?
         }
         if (jsonData[2].dataID != this.state.dataID) {

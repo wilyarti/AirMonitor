@@ -1,32 +1,29 @@
 import React, {Component} from 'react';
+import {Button, Dimensions, Image, ScrollView, Text, View} from 'react-native';
 import {
-  Button,
-  Dimensions,
-  Image,
-  Text,
-  ToastAndroid,
-  View,
-  ScrollView,
-} from 'react-native';
-import {
-  scanAndConnect,
+  getColor,
   handleConnectButton,
   processGraph,
   requestBlePermission,
+  scanAndConnect,
   setupNotifications,
 } from './Functions';
 import {BleManager} from 'react-native-ble-plx';
 import {
   VictoryArea,
+  VictoryAxis,
   VictoryChart,
   VictoryLine,
-  VictoryBar,
-  VictoryGroup,
 } from 'victory-native';
+import {
+  Defs,
+  Stop,
+  LinearGradient,
+  Svg,
+  ClipPath,
+  Rect,
+} from 'react-native-svg';
 import moment from 'moment';
-import {Defs, LinearGradient, Stop} from 'react-native-svg';
-import VClipPath from 'victory-native/lib/components/victory-primitives/clip-path';
-import VRect from 'victory-native/lib/components/victory-primitives/rect';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -41,6 +38,7 @@ export default class AirMonitor extends Component {
       fontWeight: 'bold',
     },
   };
+
   constructor() {
     super();
     this.manager = new BleManager();
@@ -87,23 +85,19 @@ export default class AirMonitor extends Component {
     const lastUpdate = this.state.lastUpdate
       ? moment(this.state.lastUpdate).fromNow()
       : 'Not connected';
-    const redData = [
-      {x: new moment(), y: 0},
-      {x: new moment(), y: 0},
-      {x: new moment(), y: 0},
-    ];
-    const greenData = [
-      {x: new moment(), y: 0},
-      {x: new moment(), y: 0},
-      {x: new moment(), y: 0},
-    ];
+    const data = this.state.data;
+    let min = 0;
+    let max = 0;
     this.state.data.map(point => {
-      if (point.y >= 700) {
-        redData.push(point);
-      } else {
-        greenData.push(point);
+      if (point.y <= min) {
+        min = point.y;
+      }
+      if (point.y >= max) {
+        max = point.y;
       }
     });
+    const colorBottom = getColor(min);
+    const colorTop = getColor(max);
 
     return (
       <View style={{flex: 1, flexDirection: 'column'}}>
@@ -138,21 +132,30 @@ export default class AirMonitor extends Component {
           {this.state.connected && (
             <VictoryChart
               height={Dimensions.get('window').height * ((1 / 24) * 16)}>
-              <VictoryLine
+              <Defs>
+                <LinearGradient
+                  id="myGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="0%"
+                  y2="100%">
+                  <Stop offset="0%" stopColor={colorTop} />
+                  <Stop offset="100%" stopColor={colorBottom} />
+                </LinearGradient>
+              </Defs>
+              <VictoryArea
+                id={'line-1'}
+                name="CO2 PPM"
                 style={{
-                  data: {stroke: 'red'},
-                  parent: {border: '1px solid #ccc'},
+                  data: {
+                    stroke: 'url(#myGradient)',
+                    fill: 'url(#myGradient)',
+                  },
+                  strokeWidth: 2,
                 }}
-                scale={{x: 'time'}}
-                data={redData}
-              />
-              <VictoryLine
-                style={{
-                  data: {stroke: 'green'},
-                  parent: {border: '1px solid #ccc'},
-                }}
-                scale={{x: 'time'}}
-                data={greenData}
+                scale={{x: 'time', y: 'linear'}}
+                interpolation="natural"
+                data={data}
               />
             </VictoryChart>
           )}
