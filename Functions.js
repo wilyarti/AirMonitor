@@ -170,6 +170,8 @@ export async function setupNotifications(device) {
           let newMoment = new moment().subtract(nowMs - jsonData[1][i]);
           let color = getColor(jsonData[0][i]);
           let point = {x: newMoment, y: jsonData[0][i], fill: color};
+          // To test gradient....
+          //point.y *= 3.5;
           data.push(point);
         }
         this.setState({data});

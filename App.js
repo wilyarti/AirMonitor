@@ -9,24 +9,19 @@ import {
   setupNotifications,
 } from './Functions';
 import {BleManager} from 'react-native-ble-plx';
-import {
-  VictoryArea,
-  VictoryAxis,
-  VictoryChart,
-  VictoryLine,
-} from 'victory-native';
-import {
-  Defs,
-  Stop,
-  LinearGradient,
-  Svg,
-  ClipPath,
-  Rect,
-} from 'react-native-svg';
+import {VictoryArea, VictoryChart} from 'victory-native';
+import {Defs, LinearGradient, Stop} from 'react-native-svg';
 import moment from 'moment';
 
 const screenWidth = Dimensions.get('window').width;
 
+function parsePercentage(number) {
+  if (number <= 100 && number >= 0) {
+    return number;
+  } else {
+    return 0;
+  }
+}
 export default class AirMonitor extends Component {
   static navigationOptions = {
     title: 'Home',
@@ -95,9 +90,47 @@ export default class AirMonitor extends Component {
       if (point.y >= max) {
         max = point.y;
       }
+      // Test our gradient
+      //point.y *= 2;
     });
-    const colorBottom = getColor(min);
-    const colorTop = getColor(max);
+    let bluePercentage = parseInt(100 - (500 / max) * 100);
+    let greenPercentage = parseInt(100 - (1000 / max) * 100);
+    let yellowPercentage = parseInt(100 - (1500 / max) * 100);
+    let orangePercentage = parseInt(100 - (2000 / max) * 100);
+    let redPercentage = parseInt(100 - (2500 / max) * 100);
+    let purplePercentage = parseInt(100 - (5000 / max) * 100);
+    if (max < 2500) {
+      purplePercentage = 0;
+    } else if (max < 2000) {
+      redPercentage = 0;
+    } else if (max < 1500) {
+      orangePercentage = 0;
+    } else if (max < 1000) {
+      yellowPercentage = 0;
+    } else if (max < 500) {
+      greenPercentage = 0;
+    }
+    bluePercentage = parsePercentage(bluePercentage);
+    greenPercentage = parsePercentage(greenPercentage);
+    yellowPercentage = parsePercentage(yellowPercentage);
+    orangePercentage = parsePercentage(orangePercentage);
+    redPercentage = parsePercentage(redPercentage);
+    purplePercentage = parsePercentage(purplePercentage);
+
+    console.log('Percentages: ');
+    console.log(
+      bluePercentage +
+        ' ' +
+        greenPercentage +
+        ' ' +
+        yellowPercentage +
+        ' ' +
+        orangePercentage +
+        ' ' +
+        redPercentage +
+        ' ' +
+        purplePercentage,
+    );
 
     return (
       <View style={{flex: 1, flexDirection: 'column'}}>
@@ -139,8 +172,12 @@ export default class AirMonitor extends Component {
                   y1="0%"
                   x2="0%"
                   y2="100%">
-                  <Stop offset="0%" stopColor={colorTop} />
-                  <Stop offset="100%" stopColor={colorBottom} />
+                  <Stop offset={bluePercentage + '%'} stopColor="blue" />
+                  <Stop offset={greenPercentage + '%'} stopColor="green" />
+                  <Stop offset={yellowPercentage + '%'} stopColor="yellow" />
+                  <Stop offset={orangePercentage + '%'} stopColor="orange" />
+                  <Stop offset={redPercentage + '%'} stopColor="red" />
+                  <Stop offset={purplePercentage + '%'} stopColor="purple" />
                 </LinearGradient>
               </Defs>
               <VictoryArea
@@ -153,9 +190,9 @@ export default class AirMonitor extends Component {
                   },
                   strokeWidth: 2,
                 }}
-                scale={{x: 'time', y: 'linear'}}
                 interpolation="natural"
                 data={data}
+                scale={{x: 'time', y: 'linear'}}
               />
             </VictoryChart>
           )}
