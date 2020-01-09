@@ -155,7 +155,7 @@ export async function setupNotifications(device) {
         let data = this.state.data;
         console.log(jsonData);
         if (jsonData[2].sequenceID === 65536) {
-          //console.log(this.state.data);
+          console.log(this.state.data);
           //this.processGraph(); ? Animate?
         }
         if (jsonData[2].dataID != this.state.dataID) {
@@ -168,10 +168,7 @@ export async function setupNotifications(device) {
         // setup our labels
         for (let i = 0; i < jsonData[2].count; i++) {
           let newMoment = new moment().subtract(nowMs - jsonData[1][i]);
-          let color = getColor(jsonData[0][i]);
-          let point = {x: newMoment, y: jsonData[0][i], fill: color};
-          // To test gradient....
-          //point.y *= 3.5;
+          let point = {x: newMoment, y: jsonData[0][i]};
           data.push(point);
         }
         this.setState({data});

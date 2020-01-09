@@ -9,7 +9,7 @@ import {
   setupNotifications,
 } from './Functions';
 import {BleManager} from 'react-native-ble-plx';
-import {VictoryArea, VictoryChart} from 'victory-native';
+import {VictoryArea, VictoryGroup, VictoryChart} from 'victory-native';
 import {Defs, LinearGradient, Stop} from 'react-native-svg';
 import moment from 'moment';
 
@@ -163,38 +163,39 @@ export default class AirMonitor extends Component {
 
         <View style={{flex: 16}}>
           {this.state.connected && (
-            <VictoryChart
-              height={Dimensions.get('window').height * ((1 / 24) * 16)}>
-              <Defs>
-                <LinearGradient
-                  id="myGradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="0%"
-                  y2="100%">
-                  <Stop offset={bluePercentage + '%'} stopColor="blue" />
-                  <Stop offset={greenPercentage + '%'} stopColor="green" />
-                  <Stop offset={yellowPercentage + '%'} stopColor="yellow" />
-                  <Stop offset={orangePercentage + '%'} stopColor="orange" />
-                  <Stop offset={redPercentage + '%'} stopColor="red" />
-                  <Stop offset={purplePercentage + '%'} stopColor="purple" />
-                </LinearGradient>
-              </Defs>
-              <VictoryArea
-                id={'line-1'}
-                name="CO2 PPM"
-                style={{
-                  data: {
-                    stroke: 'url(#myGradient)',
-                    fill: 'url(#myGradient)',
-                  },
-                  strokeWidth: 2,
-                }}
-                interpolation="natural"
-                data={data}
-                scale={{x: 'time', y: 'linear'}}
-              />
-            </VictoryChart>
+            <VictoryGroup>
+              <VictoryChart
+                height={Dimensions.get('window').height * ((1 / 24) * 16)}>
+                <VictoryArea
+                  id={'line-1'}
+                  name="CO2 PPM"
+                  style={{
+                    data: {
+                      fill: 'url(#myGradient)',
+                    },
+                    strokeWidth: 2,
+                  }}
+                  interpolation="natural"
+                  data={data}
+                  scale={{x: 'time', y: 'linear'}}
+                />
+                <Defs>
+                  <LinearGradient
+                    id="myGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="0%"
+                    y2="100%">
+                    <Stop offset={bluePercentage + '%'} stopColor="blue" />
+                    <Stop offset={greenPercentage + '%'} stopColor="green" />
+                    <Stop offset={yellowPercentage + '%'} stopColor="yellow" />
+                    <Stop offset={orangePercentage + '%'} stopColor="orange" />
+                    <Stop offset={redPercentage + '%'} stopColor="red" />
+                    <Stop offset={purplePercentage + '%'} stopColor="purple" />
+                  </LinearGradient>
+                </Defs>
+              </VictoryChart>
+            </VictoryGroup>
           )}
         </View>
         <View style={{flex: 1}}>
