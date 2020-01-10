@@ -82,16 +82,18 @@ export default class AirMonitor extends Component {
       : 'Not connected';
     const data = this.state.data;
     let min = 0;
+    let minTime;
     let max = 0;
+    let maxTime;
     this.state.data.map(point => {
       if (point.y <= min) {
         min = point.y;
+        minTime = point.x;
       }
       if (point.y >= max) {
         max = point.y;
+        maxTime = point.x;
       }
-      // Test our gradient
-      //point.y *= 2;
     });
     let bluePercentage = parseInt(100 - (500 / max) * 100);
     let greenPercentage = parseInt(100 - (1000 / max) * 100);
@@ -136,29 +138,46 @@ export default class AirMonitor extends Component {
       <View style={{flex: 1, flexDirection: 'column'}}>
         <View
           style={{
+            flex: 4,
+            alignItems: 'center',
+          }}>
+          <View style={{flexDirection: 'row'}}>
+            <View style={{flex: 1}}>
+              <Image
+                source={require('./favicon.png')}
+                style={{width: 230 / 4, height: 266 / 4, resizeMode: 'stretch'}}
+              />
+            </View>
+            <View style={{flex: 2}}>
+              <Text style={{fontSize: 18}}>Air Quality Monitor</Text>
+            </View>
+          </View>
+        </View>
+
+        <View
+          style={{
             flex: 7,
             alignItems: 'center',
           }}>
-          <Image
-            source={require('./favicon.png')}
-            style={{width: 230 / 4, height: 266 / 4, resizeMode: 'stretch'}}
-          />
-          <ScrollView>
-            <Text style={{fontSize: 18}}>Air Quality Monitor</Text>
-            <Text>
-              {list.map((l, i) => (
-                <Text key={i}>{l}</Text>
-              ))}{' '}
-            </Text>
-            <Text>Temperature: {this.state.temp}</Text>
-            <Text>CO2: {this.state.co2}</Text>
-            <Text>Last update: {lastUpdate}</Text>
-            <Button
-              title={this.state.connected ? 'Disconnect' : 'Connect'}
-              disabled={this.state.isLoading}
-              onPress={() => this.handleConnectButton()}
-            />
-          </ScrollView>
+          <View style={{flexDirection: 'row'}}>
+            <View style={{flex: 1}}>
+              <Text>
+                Min: {min} {minTime ? minTime.fromNow() : ''}
+              </Text>
+              <Text>
+                Max: {max} {maxTime ? maxTime.fromNow() : ''}
+              </Text>
+              <Button
+                  title={this.state.connected ? 'Disconnect' : 'Connect'}
+                  disabled={this.state.isLoading}
+                  onPress={() => this.handleConnectButton()}
+              />
+            </View>
+            <View style={{flex: 1}}>
+              <Text>Temperature: {this.state.temp}</Text>
+              <Text>CO2: {this.state.co2}</Text>
+            </View>
+          </View>
         </View>
 
         <View style={{flex: 16}}>
@@ -198,8 +217,10 @@ export default class AirMonitor extends Component {
             </VictoryGroup>
           )}
         </View>
-        <View style={{flex: 1}}>
-          <Text>{this.state.connected ? 'Connected' : 'Not connected'}</Text>
+        <View style={{flex: 2, flexDirection: 'row'}}>
+          <View style={{flex: 1}}>
+            <Text>{this.state.connected ? 'Connected' : 'Not connected'}</Text>
+          </View>
         </View>
       </View>
     );
