@@ -168,9 +168,9 @@ export default class AirMonitor extends Component {
                 Max: {max} {maxTime ? maxTime.fromNow() : ''}
               </Text>
               <Button
-                  title={this.state.connected ? 'Disconnect' : 'Connect'}
-                  disabled={this.state.isLoading}
-                  onPress={() => this.handleConnectButton()}
+                title={this.state.connected ? 'Disconnect' : 'Connect'}
+                disabled={this.state.isLoading}
+                onPress={() => this.handleConnectButton()}
               />
             </View>
             <View style={{flex: 1}}>
