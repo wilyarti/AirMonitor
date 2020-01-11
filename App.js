@@ -12,8 +12,7 @@ import {BleManager} from 'react-native-ble-plx';
 import {VictoryArea, VictoryGroup, VictoryChart} from 'victory-native';
 import {Defs, LinearGradient, Stop} from 'react-native-svg';
 import moment from 'moment';
-
-const screenWidth = Dimensions.get('window').width;
+import DATA from './data';
 
 function parsePercentage(number) {
   if (number <= 100 && number >= 0) {
@@ -38,6 +37,7 @@ export default class AirMonitor extends Component {
     super();
     this.manager = new BleManager();
     this.state = {
+      mockup: true,
       isLoading: false,
       deviceID: '00:00:00:00:00:00',
       devices: [],
@@ -61,6 +61,10 @@ export default class AirMonitor extends Component {
   }
 
   componentDidMount() {
+    if (this.state.mockup) {
+      this.setState({data: DATA, isLoading: false, connected: true});
+      return;
+    }
     try {
       this.requestBlePermission().then(() => {
         const subscription = this.manager.onStateChange(state => {
@@ -156,16 +160,18 @@ export default class AirMonitor extends Component {
 
         <View
           style={{
-            flex: 7,
+            flex: 4,
             alignItems: 'center',
           }}>
           <View style={{flexDirection: 'row'}}>
             <View style={{flex: 1}}>
               <Text>
-                Min: {min} {minTime ? minTime.fromNow() : ''}
+                Min: {min}
+                {minTime && !this.state.mockup ? minTime.fromNow() : ''}
               </Text>
               <Text>
-                Max: {max} {maxTime ? maxTime.fromNow() : ''}
+                Max: {max}
+                {maxTime && !this.state.mockup ? maxTime.fromNow() : ''}
               </Text>
               <Button
                 title={this.state.connected ? 'Disconnect' : 'Connect'}
@@ -180,11 +186,11 @@ export default class AirMonitor extends Component {
           </View>
         </View>
 
-        <View style={{flex: 16}}>
+        <View style={{flex: 13}}>
           {this.state.connected && (
-            <VictoryGroup>
-              <VictoryChart
-                height={Dimensions.get('window').height * ((1 / 24) * 16)}>
+            <VictoryGroup
+              height={Dimensions.get('window').height * ((1 / 24) * 13)}>
+              <VictoryChart>
                 <VictoryArea
                   id={'line-1'}
                   name="CO2 PPM"
@@ -198,22 +204,22 @@ export default class AirMonitor extends Component {
                   data={data}
                   scale={{x: 'time', y: 'linear'}}
                 />
-                <Defs>
-                  <LinearGradient
-                    id="myGradient"
-                    x1="0%"
-                    y1="0%"
-                    x2="0%"
-                    y2="100%">
-                    <Stop offset={bluePercentage + '%'} stopColor="blue" />
-                    <Stop offset={greenPercentage + '%'} stopColor="green" />
-                    <Stop offset={yellowPercentage + '%'} stopColor="yellow" />
-                    <Stop offset={orangePercentage + '%'} stopColor="orange" />
-                    <Stop offset={redPercentage + '%'} stopColor="red" />
-                    <Stop offset={purplePercentage + '%'} stopColor="purple" />
-                  </LinearGradient>
-                </Defs>
               </VictoryChart>
+              <Defs>
+                <LinearGradient
+                  id="myGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="0%"
+                  y2="100%">
+                  <Stop offset={bluePercentage + '%'} stopColor="blue" />
+                  <Stop offset={greenPercentage + '%'} stopColor="green" />
+                  <Stop offset={yellowPercentage + '%'} stopColor="yellow" />
+                  <Stop offset={orangePercentage + '%'} stopColor="orange" />
+                  <Stop offset={redPercentage + '%'} stopColor="red" />
+                  <Stop offset={purplePercentage + '%'} stopColor="purple" />
+                </LinearGradient>
+              </Defs>
             </VictoryGroup>
           )}
         </View>
