@@ -46,7 +46,7 @@ export default class AirMonitor extends Component {
     super();
     this.manager = new BleManager();
     this.state = {
-      mockup: true,
+      mockup: false,
       isLoading: false,
       deviceID: '00:00:00:00:00:00',
       devices: [],
@@ -158,11 +158,15 @@ export default class AirMonitor extends Component {
             <View style={{flex: 1}}>
               <Text>
                 Max CO2: {maxCo2}
-                {maxCo2 && !this.state.mockup ? maxCo2Time.fromNow() : ''}
+                {maxCo2 && ' ' && !this.state.mockup
+                  ? ' ' + maxCo2Time.fromNow()
+                  : ''}
               </Text>
               <Text>
                 Max TVOX: {maxTvoc}
-                {maxTvocTime && !this.state.mockup ? maxTvocTime.fromNow() : ''}
+                {maxTvocTime && !this.state.mockup
+                  ? ' ' + maxTvocTime.fromNow()
+                  : ''}
               </Text>
             </View>
             <View style={{flex: 1}}>
