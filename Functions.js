@@ -112,7 +112,7 @@ export async function setupNotifications(device) {
       );
       //console.log('Got value: ' + converted);
       let lastUpdate = moment(new Date());
-      this.setState({temp: converted, lastUpdate});
+      this.setState({tvoc: converted, lastUpdate});
       this.setState({connected: true});
     },
   );
@@ -152,26 +152,34 @@ export async function setupNotifications(device) {
       try {
         let jsonData = JSON.parse(converted);
         let nowMs = jsonData[2].timenow;
-        let data = this.state.data;
-        console.log(jsonData);
+        let data = [];
+        if (jsonData[2].dataID == 0) {
+          data = this.state.data;
+        } else {
+          data = this.state.dataTVOC;
+        }
+        //console.log(jsonData);
         if (jsonData[2].sequenceID === 65536) {
-          console.log(this.state.data);
+          //console.log(this.state.data);
           //this.processGraph(); ? Animate?
         }
-        if (jsonData[2].dataID != this.state.dataID) {
-          return;
-        }
+        //if (jsonData[2].dataID != this.state.dataID) {
+        //  return;
+        //}
         // reset if we have received all the data before
         if (jsonData[2].sequenceID == 0) {
           data = [];
         }
-        // setup our labels
         for (let i = 0; i < jsonData[2].count; i++) {
           let newMoment = new moment().subtract(nowMs - jsonData[1][i]);
           let point = {x: newMoment, y: jsonData[0][i]};
           data.push(point);
         }
-        this.setState({data});
+        if (jsonData[2].dataID == 0) {
+          this.setState({data});
+        } else {
+          this.setState({dataTVOC: data});
+        }
       } catch (error) {
         console.log('Error passing JSON');
         console.log(error);
