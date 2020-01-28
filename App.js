@@ -185,7 +185,7 @@ export default class AirMonitor extends Component {
               containerComponent={
                 <VictoryVoronoiContainer
                   voronoiDimension="x"
-                  labels={({datum}) => `y: ${datum.y}`}
+                  labels={({datum}) => `x: ${datum.y} at ${datum.x.toString()}`}
                   labelComponent={
                     <VictoryTooltip
                       cornerRadius={0}
