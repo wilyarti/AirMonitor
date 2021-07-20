@@ -15,7 +15,7 @@
     "mem": "^6.0.1",
     "moment": "^2.24.0",
     "react": "16.9.0",
-    "react-native": "^0.61.5",
+    "react-native": "^0.62.3",
     "react-native-ble-plx": "^1.1.0",
     "react-native-chart-kit": "^4.3.0",
     "react-native-svg": "^9.13.6",
