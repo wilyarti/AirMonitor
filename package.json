@@ -19,7 +19,7 @@
     "react-native-ble-plx": "^1.1.0",
     "react-native-chart-kit": "^4.3.0",
     "react-native-svg": "^9.13.6",
-    "victory-native": "^34.0.0"
+    "victory-native": "^36.6.8"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",
